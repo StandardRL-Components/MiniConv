@@ -40,9 +40,9 @@ The Python file `embedder.py` includes the necessary functions to convert any Py
 Once a model has been trained and prepared, you should have a directory with the following structure:
 
 - /{`model_name`}
--- manifest.json
--- {`model_name`}_{`layer_type`}NxN\_{`i`}\_{`n`}.glsl
--- ...
+    - manifest.json
+    -  {`model_name`}_{`layer_type`}NxN\_{`i`}\_{`n`}.glsl
+    -   ...   
 
 # Model Execution
 
@@ -51,15 +51,15 @@ The model executor is given as a C file, with the following dependencies:
 
 - **cJSON.c**: JSON library for model manifest parsing.
 
-- **libpng (**-lpng**)**: This is a library for handling PNG images.
+- **libpng (-lpng)**: This is a library for handling PNG images.
 
-- **zlib (**-lz**)**: This compression library is often required for PNG files as it is used to handle data compression.
+- **zlib (-lz)**: This compression library is often required for PNG files as it is used to handle data compression.
 
-- **math library (**-lm**)**: This is the standard math library in C.
+- **math library (-lm)**: This is the standard math library in C.
 
-- **EGL (**-lEGL**)**: Interface between rendering OpenGL and the underlying native platform windowing system.
+- **EGL (-lEGL)**: Interface between rendering OpenGL and the underlying native platform windowing system.
 
-- **OpenGL ES 2.0 (**-lGLESv2**)**: Support for OpenGL ES 2.0.
+- **OpenGL ES 2.0 (-lGLESv2)**: Support for OpenGL ES 2.0.
 
 The following header files are also required for compilation to provide support for the JPEG input format:
 1. **stb_image.h**: This is a header-only library for loading images in various formats (JPEG, PNG, BMP, TGA, etc.).
