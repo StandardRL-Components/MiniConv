@@ -1,0 +1,37 @@
+[
+    {
+        "name": "layer 0 (Conv5x5)",
+        "type": "conv",
+        "shader": [
+            "ExampleModel_Conv5x5_0_0.glsl",
+            "ExampleModel_Conv5x5_0_1.glsl"
+        ],
+        "stride": 1,
+        "kernel": 5,
+        "in_channels": 4,
+        "out_channels": 8
+    },
+    {
+        "name": "layer 2 (MaxPool2x2)",
+        "type": "maxpool",
+        "shader": [
+            "ExampleModel_MaxPool2x2_2.glsl",
+            "ExampleModel_MaxPool2x2_2.glsl"
+        ],
+        "stride": 3,
+        "kernel": 2,
+        "in_channels": 8,
+        "out_channels": 8
+    },
+    {
+        "name": "layer 3 (Conv5x5)",
+        "type": "conv",
+        "shader": [
+            "ExampleModel_Conv5x5_3_0.glsl"
+        ],
+        "stride": 1,
+        "kernel": 5,
+        "in_channels": 8,
+        "out_channels": 4
+    }
+]
