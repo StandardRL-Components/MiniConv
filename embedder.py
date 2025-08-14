@@ -30,7 +30,8 @@ def check_model_rules(model):
                 error_messages.append(f"Layer {i} ({layer.__class__.__name__}) has non-zero padding. {layer.padding}")
             
             # Check kernel size is square and <= 5
-            kernel_size = layer.kernel_size if isinstance(layer.kernel_size, tuple) else (layer.kernel_size, layer.kernel_size)
+            ks = layer.kernel_size
+            kernel_size = ks if isinstance(ks, tuple) else (ks, ks)
             if kernel_size[0] != kernel_size[1] or kernel_size[0] > 5:
                 valid = False
                 error_messages.append(f"Layer {i} ({layer.__class__.__name__}) has a kernel size that is not square or is greater than 5.")
@@ -828,6 +829,16 @@ def process_conv_layers(model, model_name="newmodel"):
                 # Determine the number of output channel sets
                 out_channels = layer.out_channels
                 in_channels = layer.in_channels
+                # --- Pi 4 (VideoCore VI) resource check ------------------------
+                textures  = in_channels // 4
+                samples   = (kernel_size ** 2) * textures
+                if textures > 8 or samples > 64:
+                    raise ValueError(
+                        f"Layer {idx}: Cin={in_channels}, k={kernel_size} "
+                        f"needs {textures} textures / {samples} samples > GPU limit"
+                    )
+                # ----------------------------------------------------------------
+
                 last_conv_out_channels = out_channels  # Update last conv output channels
                 if out_channels % 4 != 0:
                     raise ValueError("Number of output channels must be a multiple of 4")
@@ -859,13 +870,15 @@ def process_conv_layers(model, model_name="newmodel"):
         elif isinstance(layer, nn.MaxPool2d):
             k = layer.kernel_size[0] if isinstance(layer.kernel_size, tuple) else layer.kernel_size
             if k in max_pool_functions:
+                # Guard: kernel size and stride *must* match (GLSL expects it)
+                assert layer.stride == (k, k) or layer.stride == k, \
+                    f"MaxPool at layer {idx} has stride {layer.stride}, kernel {k}"
+
                 get_max_pool = max_pool_functions[k]
-                # Get the max pool processing function for the current kernel size
-                get_max_pool = max_pool_functions[kernel_size]
                 output_text = get_max_pool()
-                # Define filename according to the specification
-                filename = f"{model_name}/{model_name}_MaxPool{kernel_size}x{kernel_size}_{idx}.glsl"
-                shader_path = f"{model_name}_MaxPool{kernel_size}x{kernel_size}_{idx}.glsl"
+
+                filename    = f"{model_name}/{model_name}_MaxPool{k}x{k}_{idx}.glsl"
+                shader_path = f"{model_name}_MaxPool{k}x{k}_{idx}.glsl"
                 with open(filename, "w") as file:
                     file.write(output_text)
                     
