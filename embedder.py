@@ -857,9 +857,9 @@ def process_conv_layers(model, model_name="newmodel"):
 
         # Check if the layer is a MaxPool layer
         elif isinstance(layer, nn.MaxPool2d):
-            kernel_size = layer.kernel_size
-            # Ensure kernel size is within the allowed range
-            if kernel_size in max_pool_functions:
+            k = layer.kernel_size[0] if isinstance(layer.kernel_size, tuple) else layer.kernel_size
+            if k in max_pool_functions:
+                get_max_pool = max_pool_functions[k]
                 # Get the max pool processing function for the current kernel size
                 get_max_pool = max_pool_functions[kernel_size]
                 output_text = get_max_pool()
